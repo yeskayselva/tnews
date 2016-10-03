@@ -8,6 +8,7 @@
 			  <p><?php echo $row->content; ?></p>
 			  <div class="comment"><a href="#">Comments (18)</a></div>
 		  </div>
+			
 			<?php }?>
             </div>
 		</div>
