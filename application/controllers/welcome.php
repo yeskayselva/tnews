@@ -20,7 +20,7 @@ class Welcome extends CI_Controller {
 	public function index(){
 		$data['title'] = 'Home';
 		$data['main_content'] = 'home';
-		$data['result'] = $this->db->query('select * from trend_news where status = 1 limit 20')->result();
+		$data['result'] = $this->db->query('select * from trend_news where status = 1 order by id desc limit 20')->result();
 		$this->load->view('template/home_template',$data);
 	}
 	
@@ -34,24 +34,12 @@ class Welcome extends CI_Controller {
 		$google_api_response = json_decode($google_response);
 		$google_api_feed = $google_api_response->trendsByDateList;
 		// day by day feed
-		foreach($google_api_feed as $row){
+		foreach(array_reverse($google_api_feed) as $row){
 			
 			//var_dump($row->date);
 			echo $this->get_daily_feed($row->trendsList).'<br>';
 		//	exit;
-			//array('search_keyword'=>$row)
-			
-			
-//			search_keyword
-//related_search_keyword
-//hotnessLevel
-//source
-//souce_site_name
-//source_url_link
-//img_url
-//snippet
-//traffic
-//created_date
+
 		}
 		exit;
 	}
@@ -61,7 +49,7 @@ class Welcome extends CI_Controller {
 		// per day feed
 		$insert_row_count = 0;
 		$this->load->library('curl');
-		foreach($feed as $feed_row){
+		foreach(array_reverse($feed) as $feed_row){
 			echo $feed_row->title.'<br>';
 			$trend_date= $feed_row->date;
 			$i = 1;
@@ -81,7 +69,7 @@ class Welcome extends CI_Controller {
 			$google_api = array('related_search_keyword'=>implode($feed_row->relatedSearchesList,','),'search_keyword'=>$feed_row->title,'traffic'=>$feed_row->trafficBucketLowerBound,'hotnessLevel'=>$feed_row->hotnessLevel,'img_url'=>$img_url,
 				 'news_title'=>addslashes($news_title),'source_url_link'=>$source_url_link,'source_site_name'=>$souce_site_name,'snippet'=>addslashes($snippet),'trend_date'=>$trend_date);
 			$check_row = get_data('google_trend_news',array('search_keyword'=>$feed_row->title,'trend_date >='=>date('Ymd')))->num_rows();
-			//if($check_row == 0 && $trend_date == date('Ymd')){
+			if($check_row == 0 && $trend_date == date('Ymd')){
 				$insert_row_count = $insert_row_count + 1;
 				insert_data('google_trend_news',$google_api);
 				$last_insert_id = $this->db->insert_id();
@@ -93,7 +81,7 @@ class Welcome extends CI_Controller {
 					insert_data('news_website',$news_website_row);
 					//$this->curl->simple_post(site_url('welcome/insert_source_website'),$news_website_row);	
 				}
-			//}
+			}
 		}
 		return $insert_row_count;
 	}
