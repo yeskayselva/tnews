@@ -22,7 +22,7 @@ class Welcome extends CI_Controller {
 	public function index(){
 		$data['title'] = 'Home';
 		$data['main_content'] = 'home';
-		$data['result'] = $this->db->query('select * from trend_news where status = 1 order by id desc limit 20')->result();
+		$data['result'] = $this->db->query('select * from trend_news where status = 1 order by id desc limit 70')->result();
 		$this->load->view('template/home_template',$data);
 	}
 	
@@ -70,10 +70,10 @@ class Welcome extends CI_Controller {
 			$img_url = isset($feed_row->imgUrl) ? $feed_row->imgUrl : 'no_image_found.jpg';
 			$google_api = array('related_search_keyword'=>implode($feed_row->relatedSearchesList,','),'search_keyword'=>$feed_row->title,'traffic'=>$feed_row->trafficBucketLowerBound,'hotnessLevel'=>$feed_row->hotnessLevel,'img_url'=>$img_url,
 				 'news_title'=>addslashes($news_title),'source_url_link'=>$source_url_link,'source_site_name'=>$souce_site_name,'snippet'=>addslashes($snippet),'trend_date'=>$trend_date);
-			$check_row = get_data('google_trend_news',array('search_keyword'=>$feed_row->title,'trend_date >='=>date('Ymd')))->num_rows();
+			$check_row = get_data('google_hotTrend_news',array('search_keyword'=>$feed_row->title,'trend_date >='=>date('Ymd')))->num_rows();
 			if($check_row == 0 && $trend_date == date('Ymd')){
 				$insert_row_count = $insert_row_count + 1;
-				insert_data('google_trend_news',$google_api);
+				insert_data('google_hotTrend_news',$google_api);
 				$last_insert_id = $this->db->insert_id();
 			//	for($news_website as $news_website_row){
 				for($j=0;$j < count($news_website);$j++){
@@ -104,8 +104,12 @@ class Welcome extends CI_Controller {
 			
 			foreach($result->result() as $row){
 				$scrape_data = get_data($trend_api_table[$row->source_from],array('id'=>$row->trend_news_id))->row();
-				
-				insert_data('trend_news',array('title'=>$scrape_data->news_title,'source_link'=>$scrape_data->source_url_link,'img_url'=>$scrape_data->img_url,'content'=>$scrape_data->snippet,'status'=>1,'trend_date'=>$scrape_data->created_date));
+				if(isset($scrape_data->snippet)){
+					$snipped = $scrape_data->snippet;
+				}else{
+					$snipped = '';
+				}
+				insert_data('trend_news',array('title'=>$scrape_data->news_title,'source_link'=>$scrape_data->source_url_link,'img_url'=>$scrape_data->img_url,'content'=>$snipped,'status'=>1,'trend_date'=>$scrape_data->created_date));
 				$no_of_rowupdated = $no_of_rowupdated + 1;
 				update_data('news_website',array('status'=>2),array('source_from'=>$row->source_from,'trend_news_id'=>$row->trend_news_id));
 			}
