@@ -49,8 +49,8 @@ $active_group = 'default';
 $active_record = TRUE;
 
 $db['default']['hostname'] = 'localhost';
-$db['default']['username'] = 'root2';
-$db['default']['password'] = 'some_pass';
+$db['default']['username'] = 'root';
+$db['default']['password'] = 'root';
 $db['default']['database'] = 'tnews';
 $db['default']['dbdriver'] = 'mysqli';
 $db['default']['dbprefix'] = '';

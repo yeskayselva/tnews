@@ -87,9 +87,10 @@ class Welcome extends CI_Controller {
 			$check_row = get_data('google_hotTrend_news',array('search_keyword'=>$feed_row->title,'created_date >='=>date('Ymd'),'deleted'=>0))->num_rows();
 			if($check_row == 0 && $trend_date == date('Ymd')){
 				$insert_row_count = $insert_row_count + 1;
-                                $titleInsert[] = $feed_row->title.'<br>';
+                                
 				insert_data('google_hotTrend_news',$google_api);
 				$last_insert_id = $this->db->insert_id();
+                                $titleInsert[] = $last_insert_id;
 			//	for($news_website as $news_website_row){
 				for($j=0;$j < count($news_website);$j++){
 					$news_website_row = $news_website[$j];
@@ -100,6 +101,9 @@ class Welcome extends CI_Controller {
 				}
 			}
 		}
+                if($insert_row_count > 0){
+                    insert_data('news_analytics',array('tot'=>$insert_row_count,'news_id'=>json_encode($titleInsert)));
+                }
 		return json_encode(array('No of Rows'=>$insert_row_count,'insert Title'=>$titleInsert));
 	}
 	
